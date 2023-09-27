@@ -5,7 +5,6 @@ from instaloader import Profile, Post
 import os
 from deep_translator import GoogleTranslator
 import sqlite3
-import mysql.connector as mysql
 from gtts import gTTS
 import time
 import random
