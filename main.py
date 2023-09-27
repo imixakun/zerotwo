@@ -5,33 +5,19 @@ from instaloader import Profile, Post
 import os
 from deep_translator import GoogleTranslator
 import sqlite3
+import mysql.connector as mysql
 from gtts import gTTS
 import time
 import random
 import wikipedia as wiki
 import requests
 import qrcode
-import cv2
-from pyzbar import pyzbar
-from flask import Flask, request
-
-secret = '3h2g2g32hj3g232g3j2gj1g3j12g3j2h3g2hg3'
-url = 'https://mikeykun.pythonanywhere.com/' + secret
-token = '6188240649:AAGo4f0_BGg8JCXTZhIlWD4V6BHT7sJKmpo'
+# import cv2
+# from pyzbar import pyzbar
 
 wiki.set_lang("uz")
 
-bot = telebot.TeleBot(token, threaded = False)
-bot.remove_webhook()
-bot.set_webhook(url = url)
-
-app = Flask(__name__)
-
-@app.route('/' + secret, methods = 'POST')
-def webhook():
-    update = telebot.types.Update.de_json(request.stream.read().decode("utf-8"))
-    bot.process_new_updates([update])
-    return "ok", 200
+bot = telebot.TeleBot('6188240649:AAH744T-DzSLLkZqpxGC-SBymLf3gbyzpHQ')
 
 global bad_says
 bad_says = ['dnx', 'pwnx', 'pashol nax', 'pawol nax', 'idi nax', 'xarp', 'harp', 'harip', 'xarip']
@@ -58,8 +44,8 @@ def start_message(message):
 
 @bot.message_handler(content_types = ['new_chat_members'])
 def send_message(message):
-    bot.send_message(message.chat.id, f'Hello <a href="tg://user?id={message.from_user.id}">{message.from_user.first_name}</a> Welcome to group!', parse_mode = 'HTML')
     bot.delete_message(message.chat.id, message.message_id)
+    bot.send_message(message.chat.id, f'Hello <a href="tg://user?id={message.from_user.id}">{message.from_user.first_name}</a> Welcome to group!', parse_mode = 'HTML')
 
 @bot.message_handler(content_types = ['left_chat_member'])
 def send_message(message):
@@ -142,13 +128,69 @@ def send_message(message):
         bot.send_message(message.chat.id, "02 is hacked from @mikey_im x @code_idea check your security")
         bot.delete_message(message.chat.id, message.message_id) 
 
-    elif message.text.lower() == ".kick":
+    elif message.text.lower() == "..kick":
         bot.send_message(message.chat.id, f"{message.from_user.first_name} is kicked -> {message.reply_to_message.from_user.first_name}")
         # bot.delete_message(message.chat.id, message.message_id) 
 
     elif message.text.lower() == ".five":
         bot.send_message(message.chat.id, f"{message.from_user.first_name} is gived five -> {message.reply_to_message.from_user.first_name}")
         # bot.delete_message(message.chat.id, message.message_id) 
+
+
+    elif message.text.startswith(".uxla "):
+        global scmd
+        scmd = message.text[5:]
+        bot.send_message(message.chat.id, f'Apllied: {message.text[5:]}')
+
+    elif message.text.lower().startswith(".yoz "):
+        time.sleep(int(scmd))
+        bot.send_message(message.chat.id, f'{message.text[4:]}')
+
+    elif message.text.startswith("_yoz "):
+        bot.send_message(message.chat.id, f'{message.text[4:]}')
+
+    elif message.text.lower() == ".get":
+        db = mysql.connect(host = "185.27.134.215", 
+                           user = "if0_34994218",
+                           passwd = "imTz2P61wCjAitx",
+                           database = "if0_34994218_base"
+                           )
+        bot.send_message(message.chat.id, "Success")
+
+    ### 
+
+    if message.text.lower().startswith('d '):
+        try:
+            db = sqlite3.connect(f'{message.from_user.id}.db')
+            sql = db.cursor()
+
+            sql.execute(f"{message.text[2:]}")
+            db.commit()
+            bot.send_message(message.chat.id, f'::t')
+
+        except Exception as e:
+            print(f'Error: {e}')
+            bot.send_message(message.chat.id, f'Error: {e}')
+
+
+    elif message.text.lower().startswith('g '):
+        try:
+            db = sqlite3.connect(f'{message.from_user.id}.db')
+            sql = db.cursor()
+        
+            data = sql.execute(f"{message.text[2:]}").fetchall()
+            print(f'{data}')
+            bot.send_message(message.chat.id, f'{data}')
+
+        except Exception as e:
+            print(f'Error: {e}')
+            bot.send_message(message.chat.id, f'Error: {e}')
+
+    elif message.text.lower() == '.base':
+        bot.send_document(message.chat.id, document = open(f'{message.from_user.id}.db', 'rb'))
+
+
+    
 
     elif message.text.lower().startswith('.nqr '):
         img = qrcode.make(message.text[4:])
@@ -160,6 +202,7 @@ def send_message(message):
         if message.chat.type == 'private':
             bot.send_message(message.chat.id, ":$ please, send your qr photo")
             bot.register_next_step_handler(message, qrscan)
+
 
             
 
@@ -248,8 +291,16 @@ def send_message(message):
         member = bot.get_chat_member(message.chat.id, message.from_user.id)
         if member.status == 'administrator' or 'creator':
             bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id)
+            bot.send_message(message.chat.id, f"🔴 {message.reply_to_message.from_user.first_name} is kicked!\nAdmin: {message.from_user.first_name}\nCause: {message.text[5:]}")
+            bot.delete_message(message.chat.id, message.message_id)
+
+    elif message.text.lower().startswith(".kick "):
+        member = bot.get_chat_member(message.chat.id, message.from_user.id)
+        if member.status == 'administrator' or 'creator':
+            bot.kick_chat_member(message.chat.id, message.reply_to_message.from_user.id, message.date + 1)
             bot.send_message(message.chat.id, f"🔴 {message.reply_to_message.from_user.first_name} is banned!\nAdmin: {message.from_user.first_name}\nCause: {message.text[5:]}")
             bot.delete_message(message.chat.id, message.message_id)
+
 
     elif message.text.lower().startswith(".fly "):
         member = bot.get_chat_member(message.chat.id, message.from_user.id)
@@ -299,6 +350,19 @@ def send_message(message):
             bot.send_message(message.chat.id, f"{message.reply_to_message.from_user.first_name} is unmuted!\nCause: {message.text[8:]}")
             bot.delete_message(message.chat.id, message.message_id)
 
+    elif message.text.lower().startswith("$ubme "):
+        print(message.text[5:])
+        bot.unban_chat_member(message.text[6:], message.from_user.id)
+        bot.send_message(message.text[6:], f'{message.from_user.first_name} is unbanned!')
+        bot.send_message(message.chat.id, "Success!")
+
+    elif message.text.lower().startswith("$unbme "):
+        print(message.text[7:])
+        bot.unban_chat_member(f'{message.text[7:]}', message.from_user.id)
+        bot.send_message(f'{message.text[7:]}', f'{message.from_user.first_name} is unbanned!')
+        bot.send_message(message.chat.id, "Success!")
+
+
     ### group configurations
 
     elif message.text.lower() == ".pin":
@@ -318,6 +382,13 @@ def send_message(message):
         if member.status == 'administrator' or 'creator':
             bot.edit_chat_title(message.chat.id. message.text[3:])
             bot.delete_message(message.chat.id, message.message_id) 
+
+    elif message.text.lower().startswith('_all '):
+        member = bot.get_chat_member(message.chat.id, message.from_user.id)
+        if member.status == 'administrator' or 'creator':
+            bot.delete_message(message.chat.id, message.message_id)
+            bot.send_message(message.chat.id, f"#All\n\n{message.text[4:]}")
+            bot.pin_chat_message(message.chat.id, message.message_id + 1)
 
     elif message.text.lower() == ".give":
         bot.send_message(message.chat.id, message.from_user.first_name + ' gived ' + 
@@ -558,6 +629,8 @@ def send_message(message):
         with open(f'{message.chat.id}_ch', 'w') as f:
             f.write('false')        
         bot.send_message(message.chat.id, "02 cheat ::$ mode ?st :: f")
+
+
 
     elif message.text.lower() == "?cheat :: verify":
         with open(f'{message.chat.id}_ch', 'r+') as f:
@@ -803,4 +876,6 @@ def ranges(message):
 
     elif message.text == "back":
         bot.send_message(message.chat.id, "Home", reply_markup = button)
+
+bot.infinity_polling()
         
