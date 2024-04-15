@@ -16,7 +16,7 @@ import qrcode
 
 wiki.set_lang("uz")
 
-bot = telebot.TeleBot('6188240649:AAH744T-DzSLLkZqpxGC-SBymLf3gbyzpHQ')
+bot = telebot.TeleBot('token')
 
 global bad_says
 bad_says = ['dnx', 'pwnx', 'pashol nax', 'pawol nax', 'idi nax', 'xarp', 'harp', 'harip', 'xarip']
